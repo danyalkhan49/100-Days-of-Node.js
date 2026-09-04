@@ -104,7 +104,6 @@ app.get("/book/:roomId/:guestId/:nights", checkRoom, checkGuest, (req, res) => {
     });
   }
 });
-
 app.get('/cancel/:roomId/:guestId' , checkRoom , checkGuest , (req , res) =>{
     try{
         const room = req.room;
