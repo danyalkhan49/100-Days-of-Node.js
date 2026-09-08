@@ -6,12 +6,10 @@ const rooms = {
   R102: { type: "Double", pricePerNight: 3500, isBooked: false },
   R103: { type: "Suite", pricePerNight: 6000, isBooked: true }
 };
-
 const guests = {
   G1: { name: "Danial", bookings: [] },
   G2: { name: "Ali", bookings: [] }
 };
-
 function checkRoom(req, res, next) {
   const roomId = req.params.roomId;
   if (!rooms[roomId]) {
@@ -24,7 +22,6 @@ function checkRoom(req, res, next) {
   req.room = rooms[roomId];
   next();
 }
-
 function checkGuest(req, res, next) {
   const guestId = req.params.guestId;
   if (!guests[guestId]) {
@@ -37,7 +34,6 @@ function checkGuest(req, res, next) {
   req.guest = guests[guestId];
   next();
 }
-
 app.get("/rooms", (req, res) => {
   let result = Object.values(rooms);
 
@@ -104,6 +100,7 @@ app.get("/book/:roomId/:guestId/:nights", checkRoom, checkGuest, (req, res) => {
     });
   }
 });
+
 app.get('/cancel/:roomId/:guestId' , checkRoom , checkGuest , (req , res) =>{
     try{
         const room = req.room;
@@ -223,13 +220,6 @@ app.get("/admin/revenue", checkAdmin, (req, res) => {
     });
   }
 });
-
-
-
-
-
-
-
 
 app.use((req, res) => {
   const time = new Date();
