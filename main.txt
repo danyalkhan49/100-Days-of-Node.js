@@ -1,0 +1,7 @@
+
+step by step shiar your process on githubs
+
+git status
+git add .
+git commit -m "Day 08: Express Routing"
+
