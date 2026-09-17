@@ -8,7 +8,7 @@ const taskSchema = new mongoose.Schema({
     createdAt : {type : Date , default : Date.now}
 
 });
-// Error fixed: mongoose.model() requires a model name and schema as separate arguments.
+
 const Task = mongoose.model('Task', taskSchema);
 
 
@@ -33,7 +33,7 @@ async function addTasks(){
                 title : "Integrate payment gateway",
                 priority : "High",
                 status : "In-Progress",
-                // Error fixed: the incomplete property `a` caused a syntax error.
+                
                 assignedTo: "Maheen jan"
             },
             {
@@ -61,8 +61,6 @@ async function addTasks(){
     }
 
 }
-
-
 async function getPendingTasks(){
     try{
         // Error fixed: status values are case-sensitive; inserted tasks use "Pending".
@@ -74,7 +72,6 @@ async function getPendingTasks(){
         console.error("Error fetching pending tasks:", error.message);
     }
 }
-
 async function startTask(taskTitle){
     try{
         // Error fixed: findAndOneUpdate() does not exist; use findOneAndUpdate().
