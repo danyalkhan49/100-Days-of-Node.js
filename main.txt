@@ -1,9 +1,9 @@
 
-step by step shiar your process on githubs
+step by step shia your process on github
 
 git status
 git add .
-git commit -m "Day 09: update and delete operation in database "
+git commit -m "Day 10: project structure "
 
 git push origin main   
 
