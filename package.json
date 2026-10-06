@@ -1,7 +1,7 @@
 {
   "name": "summer-node",
   "version": "1.0.0",
-  "description": "",
+  "description": "My 100 Days of Node.js learning journey — daily practice, projects, and backend development.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,6 +11,19 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "mongoose": "^9.9.5"
-  }
+    "bcrypt": "^6.0.0",
+    "dotenv": "^18.0.3",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.10.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danyalkhan49/100-Days-of-Node.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/danyalkhan49/100-Days-of-Node.js/issues"
+  },
+  "homepage": "https://github.com/danyalkhan49/100-Days-of-Node.js#readme"
 }

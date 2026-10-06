@@ -1,0 +1,15 @@
+$kind: http-request
+name: http://localhost:8600/menu/6ab282772433d6903091ae64
+description: ""
+url: http://localhost:8600/menu/6ab282772433d6903091ae64
+method: DELETE
+body:
+  type: json
+  content: |-
+    {
+        "name": "Chicken Karahi",
+        "category": "Main Course",
+        "price" : 4500 , 
+        "isAvailable": true
+    }
+order: 1790179751233
