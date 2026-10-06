@@ -6,7 +6,6 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const handleValidation = require('../utils/handleValidation');
 
-// POST /freelancers
 router.post(
   '/',
   [
@@ -27,7 +26,6 @@ router.post(
   })
 );
 
-// GET /freelancers?skills=Node.js
 router.get(
   '/',
   catchAsync(async (req, res) => {
@@ -40,7 +38,6 @@ router.get(
   })
 );
 
-// GET /freelancers/:id
 router.get(
   '/:id',
   [param('id').isMongoId().withMessage('A valid freelancer ID is required')],

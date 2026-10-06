@@ -18,7 +18,8 @@ app.use('/projects', projectRoutes);
 app.use('/bids', bidRoutes);
 
 app.use((req, res, next) => {
-  next(new AppError(`Route not found: ${req.method} ${req.originalUrl}`, 404));
+  next(new AppError(`Route not found: ${req.method} ${req.originalUrl}`, 
+  404));
 });
 
 app.use((err, req, res, next) => {

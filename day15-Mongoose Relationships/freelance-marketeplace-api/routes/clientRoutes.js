@@ -6,7 +6,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const handleValidation = require('../utils/handleValidation');
 
-// POST /clients
+
 router.post(
   '/',
   [
@@ -21,7 +21,6 @@ router.post(
   })
 );
 
-// GET /clients
 router.get(
   '/',
   catchAsync(async (req, res) => {
@@ -30,7 +29,6 @@ router.get(
   })
 );
 
-// GET /clients/:id  (posted projects populated)
 router.get(
   '/:id',
   [param('id').isMongoId().withMessage('A valid client ID is required')],
