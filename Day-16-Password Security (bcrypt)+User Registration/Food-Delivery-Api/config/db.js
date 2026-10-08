@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 function connectDB(){
-    mongoose.connect('http:/127.0.0.1:21727/FoodDeliveryApi')
+    mongoose.connect('mongodb://127.0.0.1:27017/FoodDeliveryApi')
     .then(()=>{
         console.log('mongoose connected Successfully');
     })
@@ -8,4 +8,4 @@ function connectDB(){
         console.log('connection Error' , err);
     })
 }
-module.exports = connectDB();
+module.exports = connectDB;

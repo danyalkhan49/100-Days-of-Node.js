@@ -8,9 +8,6 @@ git commit -m "JWT (JSON Web Tokens)"
 git push origin main   
 
 
-
-
-
 day15-Mongoose Relationships
 
 
