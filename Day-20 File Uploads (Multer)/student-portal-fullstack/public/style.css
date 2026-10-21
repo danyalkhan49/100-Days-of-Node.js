@@ -1,0 +1,50 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f5f9;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 420px;
+  margin: 0 auto;
+}
+h1 { text-align: center; color: #2c5f8a; }
+.card {
+  background: white;
+  padding: 18px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+button {
+  width: 100%;
+  padding: 10px;
+  background: #2c5f8a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover { background: #21496b; }
+.message { text-align: center; min-height: 20px; font-weight: bold; }
+.error { color: #c0392b; }
+.success { color: #27ae60; }
+.avatar {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  margin: 0 auto 12px;
+  border: 3px solid #2c5f8a;
+}
+.center { text-align: center; }
