@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#fbf8f6">
+  <meta name="description" content="Review LifeLink in-app notifications and manage email and phone preferences.">
+  <title>Notifications · LifeLink</title><link rel="stylesheet" href="css/style.css">
+  <script src="js/common.js" defer></script><script src="js/notifications.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a><div data-site-header></div>
+  <main id="main-content" class="container page-shell">
+    <section class="page-intro"><p class="eyebrow">Updates</p><h1>Notifications</h1><p>Review important updates about requests, offers, and your account.</p></section>
+    <div id="notifications-message" class="notice" role="status" aria-live="polite" hidden></div>
+    <section class="panel">
+      <div class="panel-heading"><div><p class="eyebrow">Your inbox</p><h2>In-app notifications <span id="inbox-unread-count" class="muted-text" aria-live="polite"></span></h2></div><button id="mark-all-read" class="button button-outline button-small" type="button">Mark all as read</button></div>
+      <div id="inbox-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="In-app notification pages"><button class="button button-outline button-small" id="inbox-prev" type="button" disabled>Previous</button><span id="inbox-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="inbox-next" type="button" disabled>Next</button></nav>
+    </section>
+    <section class="panel">
+      <div class="panel-heading"><div><p class="eyebrow">Your choices</p><h2>Notification preferences</h2></div></div>
+      <form id="notification-preferences" class="form-stack">
+        <label class="check-row"><input type="checkbox" name="email"><span>Email notifications (requires verified email)</span></label>
+        <label class="check-row"><input type="checkbox" name="sms"><span>SMS notifications (requires verified phone and configured provider)</span></label>
+        <label class="check-row"><input type="checkbox" name="whatsapp"><span>WhatsApp notifications (requires verified phone and configured provider)</span></label>
+        <label class="check-row"><input type="checkbox" name="reminders"><span>Eligibility reminder preference</span></label>
+        <p id="preferences-message" class="form-message" role="status" aria-live="polite"></p>
+        <button class="button button-primary" type="submit">Save preferences</button>
+      </form>
+    </section>
+    <section class="panel admin-table-panel">
+      <div class="panel-heading"><div><p class="eyebrow">Delivery history</p><h2>Recent notification attempts</h2></div><button id="refresh-notifications" class="button button-outline button-small" type="button">Refresh</button></div>
+      <div id="notification-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Notification pages"><button class="button button-outline button-small" id="notification-prev" type="button" disabled>Previous</button><span id="notification-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="notification-next" type="button" disabled>Next</button></nav>
+    </section>
+  </main>
+  <div data-site-footer></div>
+</body>
+</html>

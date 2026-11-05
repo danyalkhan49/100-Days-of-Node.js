@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#fbf8f6">
+  <title>Requester workspace · LifeLink</title><link rel="stylesheet" href="css/style.css">
+  <script src="js/common.js" defer></script><script src="js/requester.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a><div data-site-header></div>
+  <main id="main-content" class="container page-shell">
+    <aside class="emergency-notice" role="note" aria-label="Emergency guidance">
+      <strong>Emergency?</strong> If someone's life is in immediate danger, contact your nearest hospital or call Pakistan Rescue 1122 immediately.
+      <a href="tel:1122" aria-label="Call Pakistan Rescue 1122">Call 1122</a>
+    </aside>
+    <section class="page-intro page-intro-row"><div><p class="eyebrow">Requester workspace</p><h1>Coordinate a blood request.</h1><p>Create a request, review donor offers, and keep the people helping you up to date.</p></div><a class="button button-primary" href="#request-form-panel">Create Blood Request <span aria-hidden="true">↓</span></a></section>
+    <div class="requester-layout">
+      <section class="panel request-form-panel" id="request-form-panel" aria-labelledby="request-form-heading">
+        <div class="panel-heading"><div><p class="eyebrow">Request details</p><h2 id="request-form-heading">Create a request</h2></div><span class="step-mark" aria-hidden="true">01</span></div>
+        <p class="muted-copy">Fields marked required help donors understand what is needed. Do not include sensitive medical details in the optional note.</p>
+        <form id="request-form" class="form-stack" novalidate>
+          <div class="field"><label for="request-patient">Patient name</label><input id="request-patient" name="patientName" required maxlength="80"></div>
+          <div class="form-row">
+            <div class="field"><label for="request-blood-group">Blood group needed</label><select id="request-blood-group" name="bloodGroup" required><option value="">Choose a blood group</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+            <div class="field"><label for="request-units">Units needed</label><input id="request-units" name="unitsNeeded" type="number" min="1" max="10" step="1" value="1" required></div>
+          </div>
+          <div class="field"><label for="request-hospital">Hospital</label><input id="request-hospital" name="hospital" required maxlength="120"></div>
+          <div class="field"><label for="request-city">City</label><input id="request-city" name="city" required maxlength="80"></div>
+          <div class="form-row">
+            <div class="field"><label for="request-urgency">Urgency</label><select id="request-urgency" name="urgency" required><option>Normal</option><option>Urgent</option><option>Critical</option></select></div>
+            <div class="field"><label for="request-needed-by">Needed by</label><input id="request-needed-by" name="neededBy" type="datetime-local" required></div>
+          </div>
+          <div class="field"><label for="request-note">Additional note <span class="label-optional">Optional</span></label><textarea id="request-note" name="note" rows="3" maxlength="300"></textarea><span class="field-hint">Maximum 300 characters. Avoid adding private health information.</span></div>
+          <p class="form-message" id="request-form-message" role="status" aria-live="polite"></p>
+          <div class="form-actions"><button class="button button-primary" id="request-submit" type="submit">Post request</button><button class="button button-quiet" id="cancel-edit" type="button" hidden>Cancel edit</button></div>
+        </form>
+      </section>
+      <section class="panel my-requests-panel" aria-labelledby="my-requests-heading">
+        <div class="panel-heading"><div><p class="eyebrow">Your coordination</p><h2 id="my-requests-heading">My requests</h2></div><span class="step-mark" aria-hidden="true">02</span></div>
+        <form id="my-request-filter" class="inline-filter"><label for="my-request-status">Filter by status</label><select id="my-request-status" name="status"><option value="">All statuses</option><option>Open</option><option>Fulfilled</option><option>Closed</option></select></form>
+        <div id="my-requests-message" class="notice" role="status" aria-live="polite" hidden></div>
+        <div id="my-requests-list" class="stack-list" aria-busy="false"></div>
+        <nav class="pagination pagination-compact" aria-label="Your request pages"><button class="button button-outline button-small" id="my-requests-prev" type="button" disabled>Previous</button><span id="my-requests-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="my-requests-next" type="button" disabled>Next</button></nav>
+      </section>
+      <section class="panel donor-search-panel" aria-labelledby="donor-search-heading">
+        <div class="panel-heading"><div><p class="eyebrow">Explore donors</p><h2 id="donor-search-heading">Search by compatibility</h2></div><span class="step-mark" aria-hidden="true">03</span></div>
+        <p class="muted-copy">Choose a recipient blood group to find compatible, available donors. Contact information is not included.</p>
+        <form id="donor-search-form" class="filter-grid donor-filter-grid">
+          <div class="field"><label for="donor-search-blood-group">Recipient blood group</label><select id="donor-search-blood-group" name="bloodGroup" required><option value="">Choose a group</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+          <div class="field"><label for="donor-search-city">City</label><input id="donor-search-city" name="city" maxlength="80"></div>
+          <div class="field"><label for="donor-search-name">Donor name</label><input id="donor-search-name" name="search" type="search" maxlength="80"></div>
+          <label class="check-row"><input id="nearby-search" type="checkbox"><span>Search near my current location</span></label>
+          <div class="field"><label for="nearby-radius">Search radius</label><select id="nearby-radius"><option value="10">10 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select></div>
+          <label class="check-row"><input type="checkbox" name="eligibleOnly" checked><span>Show eligible donors only</span></label>
+          <div class="filter-submit"><button class="button button-primary" type="submit">Search donors</button></div>
+        </form>
+        <div id="donor-search-message" class="notice" role="status" aria-live="polite" hidden></div>
+        <div id="donor-results" class="donor-grid" aria-busy="false"></div>
+        <nav class="pagination pagination-compact" aria-label="Donor search pages"><button class="button button-outline button-small" id="donors-prev" type="button" disabled>Previous</button><span id="donors-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="donors-next" type="button" disabled>Next</button></nav>
+      </section>
+    </div>
+  </main>
+  <dialog class="contact-dialog" id="report-dialog" aria-labelledby="report-dialog-title">
+    <div class="dialog-inner"><button class="dialog-close" type="button" data-close-dialog aria-label="Close report form">×</button>
+      <p class="eyebrow">Help keep LifeLink safe</p><h2 id="report-dialog-title">Submit a report</h2>
+      <form id="report-form" class="form-stack">
+        <div class="field"><label for="report-reason">Reason</label><select id="report-reason" name="reason" required><option value="">Choose a reason</option><option value="fake-account">Fake account</option><option value="fraud">Fraud</option><option value="harassment">Harassment</option><option value="spam">Spam</option><option value="misleading">Misleading information</option><option value="other">Other</option></select></div>
+        <div class="field"><label for="report-description">Details <span class="label-optional">Optional</span></label><textarea id="report-description" name="description" rows="4" maxlength="1000"></textarea></div>
+        <p id="report-form-message" class="form-message" role="status" aria-live="polite"></p>
+        <button class="button button-primary" type="submit">Submit report</button>
+      </form>
+    </div>
+  </dialog>
+  <dialog class="contact-dialog" id="contact-dialog" aria-labelledby="contact-title">
+    <div class="dialog-inner"><button class="dialog-close" type="button" data-close-dialog aria-label="Close contact details">×</button><p class="eyebrow">Accepted offer</p><h2 id="contact-title">Donor contact details</h2><p>Shared only with the requester and donor for this accepted offer.</p><div id="contact-details" class="contact-details"></div><button class="button button-outline" type="button" data-close-dialog>Close</button></div>
+  </dialog>
+  <div data-site-footer></div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#fbf8f6">
+  <title>Open blood requests · LifeLink</title><link rel="stylesheet" href="css/style.css">
+  <script src="js/common.js" defer></script><script src="js/requests.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a><div data-site-header></div>
+  <main id="main-content" class="container page-shell">
+    <aside class="emergency-notice" role="note" aria-label="Emergency guidance">
+      <strong>Emergency?</strong> If someone's life is in immediate danger, contact your nearest hospital or call Pakistan Rescue 1122 immediately.
+      <a href="tel:1122" aria-label="Call Pakistan Rescue 1122">Call 1122</a>
+    </aside>
+    <section class="page-intro page-intro-row"><div><p class="eyebrow">The request board</p><h1>Find an open request</h1><p>Browse current requests by blood group, city, and urgency. Donor contact details are never shown in this list.</p></div><div class="page-intro-actions"><a class="button button-primary" href="requester.html#request-form-panel">Create Blood Request <span aria-hidden="true">→</span></a><a class="button button-outline" href="index.html#account">Join LifeLink</a></div></section>
+    <section class="panel filter-panel" aria-labelledby="filter-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Refine the list</p><h2 id="filter-heading">Search requests</h2></div><button class="button button-quiet button-small" id="clear-filters" type="button">Clear filters</button></div>
+      <form id="request-filters" class="filter-grid">
+        <div class="field"><label for="filter-blood-group">Blood group</label><select id="filter-blood-group" name="bloodGroup"><option value="">All groups</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+        <div class="field"><label for="filter-city">City</label><input id="filter-city" name="city" type="text" placeholder="e.g. Rawalpindi" maxlength="80"></div>
+        <div class="field"><label for="filter-urgency">Urgency</label><select id="filter-urgency" name="urgency"><option value="">All urgency levels</option><option>Critical</option><option>Urgent</option><option>Normal</option></select></div>
+        <div class="field"><label for="filter-search">Hospital</label><input id="filter-search" name="search" type="search" placeholder="Search hospitals" maxlength="100"></div>
+        <div class="field"><label for="filter-sort">Sort by</label><select id="filter-sort" name="sortBy"><option value="neededBy">Soonest needed</option><option value="createdAt">Recently posted</option></select></div>
+        <div class="field"><label for="filter-order">Order</label><select id="filter-order" name="order"><option value="asc">Earliest first</option><option value="desc">Latest first</option></select></div>
+        <div class="filter-submit"><button class="button button-primary" type="submit">Apply filters</button></div>
+      </form>
+    </section>
+    <section class="results-section" aria-labelledby="results-heading">
+      <div class="results-header"><div><p class="eyebrow">Live from the request board</p><h2 id="results-heading">Open requests</h2></div><p class="results-count" id="request-count" aria-live="polite"></p></div>
+      <div id="requests-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="request-list" class="request-grid" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Request pages"><button class="button button-outline button-small" id="request-prev" type="button" disabled>Previous</button><span id="request-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="request-next" type="button" disabled>Next</button></nav>
+    </section>
+  </main>
+  <dialog class="contact-dialog" id="report-dialog" aria-labelledby="report-dialog-title">
+    <div class="dialog-inner"><button class="dialog-close" type="button" data-close-dialog aria-label="Close report form">×</button>
+      <p class="eyebrow">Help keep LifeLink safe</p><h2 id="report-dialog-title">Submit a report</h2>
+      <form id="report-form" class="form-stack">
+        <div class="field"><label for="report-reason">Reason</label><select id="report-reason" name="reason" required><option value="">Choose a reason</option><option value="fake-account">Fake account</option><option value="fraud">Fraud</option><option value="harassment">Harassment</option><option value="spam">Spam</option><option value="misleading">Misleading information</option><option value="other">Other</option></select></div>
+        <div class="field"><label for="report-description">Details <span class="label-optional">Optional</span></label><textarea id="report-description" name="description" rows="4" maxlength="1000"></textarea></div>
+        <p id="report-form-message" class="form-message" role="status" aria-live="polite"></p>
+        <button class="button button-primary" type="submit">Submit report</button>
+      </form>
+    </div>
+  </dialog>
+  <div data-site-footer></div>
+</body>
+</html>

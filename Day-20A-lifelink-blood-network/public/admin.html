@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#fbf8f6">
+  <title>Admin workspace · LifeLink</title><link rel="stylesheet" href="css/style.css">
+  <script src="js/common.js" defer></script><script src="js/admin.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a><div data-site-header></div>
+  <main id="main-content" class="container page-shell">
+    <section class="page-intro"><p class="eyebrow">LifeLink administration</p><h1>Network overview</h1><p>Review service totals, manage accounts, and moderate requests. Changes are applied by the server and may not be reversible.</p></section>
+    <section class="admin-stats-section" aria-labelledby="stats-heading">
+      <div class="results-header"><div><p class="eyebrow">Current service data</p><h2 id="stats-heading">Network summary</h2></div><button class="button button-outline button-small" id="refresh-stats" type="button">Refresh</button></div>
+      <div id="stats-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="admin-stats" class="stats-grid" aria-busy="false"></div>
+      <section class="panel group-summary" aria-labelledby="group-summary-heading"><div class="panel-heading"><div><p class="eyebrow">Open requests</p><h3 id="group-summary-heading">By blood group</h3></div></div><div id="open-group-stats" class="group-stat-list"></div></section>
+    </section>
+    <section class="panel admin-table-panel" aria-labelledby="admin-audit-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Administrative history</p><h2 id="admin-audit-heading">Admin audit log</h2></div></div>
+      <p class="field-hint">Immutable records of administrative actions. Personal documents and contact details are never shown here.</p>
+      <form id="admin-audit-filters" class="admin-filter-grid">
+        <div class="field"><label for="admin-audit-search">Search action, actor, or ID</label><input id="admin-audit-search" name="search" type="search" maxlength="100"></div>
+        <div class="field"><label for="admin-audit-action">Action</label><select id="admin-audit-action" name="action"><option value="">All actions</option><option value="password-reset-email">Password reset initiation</option><option value="user-deactivated">User deactivation</option><option value="request-closed">Request closure</option><option value="request-deleted">Request deletion</option><option value="offer-moderated">Offer moderation</option><option value="report-reviewed">Report review</option><option value="review-moderated">Review moderation</option><option value="verification-decision">Verification decision</option><option value="identity-document-downloaded">Identity document access</option><option value="hospital-created">Hospital created</option><option value="hospital-updated">Hospital updated</option><option value="hospital-removed">Hospital removed</option></select></div>
+        <div class="field"><label for="admin-audit-target">Target type</label><select id="admin-audit-target" name="targetType"><option value="">All targets</option><option value="user">User</option><option value="request">Request</option><option value="offer">Offer</option><option value="report">Report</option><option value="review">Review</option><option value="identity-verification">Identity verification</option><option value="hospital">Hospital</option></select></div>
+        <div class="field"><label for="admin-audit-from">From</label><input id="admin-audit-from" name="from" type="date"></div>
+        <div class="field"><label for="admin-audit-to">To</label><input id="admin-audit-to" name="to" type="date"></div>
+        <div class="filter-submit"><button class="button button-primary" type="submit">Filter audit log</button></div>
+      </form>
+      <div id="admin-audit-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="admin-audit-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Admin audit log pages"><button class="button button-outline button-small" id="admin-audit-prev" type="button" disabled>Previous</button><span id="admin-audit-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="admin-audit-next" type="button" disabled>Next</button></nav>
+    </section>
+    <section class="panel admin-table-panel" aria-labelledby="admin-support-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Customer care</p><h2 id="admin-support-heading">Support tickets</h2></div></div>
+      <form id="admin-support-filters" class="inline-filter">
+        <label for="admin-support-status">Status</label><select id="admin-support-status" name="status"><option value="">All statuses</option><option>Open</option><option>In Progress</option><option>Resolved</option></select>
+        <label for="admin-support-category">Category</label><select id="admin-support-category" name="category"><option value="">All categories</option><option>Technical Issue</option><option>Report a User or Request</option><option>Donation Help</option><option>Account Problem</option><option>Other</option></select>
+      </form>
+      <div id="admin-support-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="admin-support-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Support ticket pages"><button class="button button-outline button-small" id="admin-support-prev" type="button" disabled>Previous</button><span id="admin-support-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="admin-support-next" type="button" disabled>Next</button></nav>
+    </section>
+    <section class="panel admin-table-panel" aria-labelledby="users-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Account management</p><h2 id="users-heading">Users</h2></div></div>
+      <form id="user-filters" class="admin-filter-grid">
+        <div class="field"><label for="user-search">Search name or email</label><input id="user-search" name="search" type="search" maxlength="100"></div>
+        <div class="field"><label for="user-role-filter">Role</label><select id="user-role-filter" name="role"><option value="">All roles</option><option>donor</option><option>requester</option><option>admin</option></select></div>
+        <div class="field"><label for="user-active-filter">Account status</label><select id="user-active-filter" name="isActive"><option value="">All accounts</option><option value="true">Active</option><option value="false">Deactivated</option></select></div>
+        <div class="filter-submit"><button class="button button-primary" type="submit">Apply filters</button></div>
+      </form>
+      <div id="users-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div class="table-wrap" id="users-table-wrap" aria-busy="false"><table><caption class="sr-only">LifeLink user accounts</caption><thead><tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">Blood group</th><th scope="col">City</th><th scope="col">Email</th><th scope="col">Status</th><th scope="col"><span class="sr-only">Account actions</span></th></tr></thead><tbody id="users-table-body"></tbody></table></div>
+      <nav class="pagination" aria-label="User pages"><button class="button button-outline button-small" id="users-prev" type="button" disabled>Previous</button><span id="users-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="users-next" type="button" disabled>Next</button></nav>
+    </section>
+    <section class="panel admin-table-panel" aria-labelledby="admin-reports-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Safety and moderation</p><h2 id="admin-reports-heading">User reports</h2></div></div>
+      <form id="admin-report-filters" class="admin-filter-grid">
+        <div class="field"><label for="report-search">Search reports</label><input id="report-search" name="search" type="search" maxlength="100"></div>
+        <div class="field"><label for="report-status-filter">Status</label><select id="report-status-filter" name="status"><option value="">All statuses</option><option>Pending</option><option>Under Review</option><option>Resolved</option><option>Rejected</option></select></div>
+        <div class="field"><label for="report-type-filter">Type</label><select id="report-type-filter" name="reportType"><option value="">All types</option><option value="user">User</option><option value="request">Request</option></select></div>
+        <div class="filter-submit"><button class="button button-primary" type="submit">Search reports</button></div>
+      </form>
+      <div id="admin-reports-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="admin-reports-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Report pages"><button class="button button-outline button-small" id="reports-prev" type="button" disabled>Previous</button><span id="reports-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="reports-next" type="button" disabled>Next</button></nav>
+    </section>
+    <section class="panel admin-table-panel" aria-labelledby="admin-reviews-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Safety and moderation</p><h2 id="admin-reviews-heading">Ratings and reviews</h2></div></div>
+      <p class="field-hint">Only published reviews appear on user profiles and contribute to public ratings.</p>
+      <form id="admin-review-filters" class="inline-filter"><label for="admin-review-status">Filter by status</label><select id="admin-review-status" name="status"><option>Pending</option><option>Published</option><option>Rejected</option><option value="">All statuses</option></select></form>
+      <div id="admin-reviews-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="admin-reviews-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Review pages"><button class="button button-outline button-small" id="reviews-prev" type="button" disabled>Previous</button><span id="reviews-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="reviews-next" type="button" disabled>Next</button></nav>
+    </section>
+    <section class="panel admin-table-panel" aria-labelledby="identity-review-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Private identity documents</p><h2 id="identity-review-heading">Identity verification queue</h2></div></div>
+      <p class="field-hint">Only authorized administrators can download submitted documents. Verify identity manually; do not infer verification from an upload.</p>
+      <form id="identity-review-filters" class="inline-filter"><label for="identity-review-status">Filter by status</label><select id="identity-review-status" name="status"><option>Pending</option><option>Verified</option><option>Rejected</option></select></form>
+      <div id="identity-review-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="identity-review-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Identity verification pages"><button class="button button-outline button-small" id="identity-review-prev" type="button" disabled>Previous</button><span id="identity-review-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="identity-review-next" type="button" disabled>Next</button></nav>
+    </section>
+    <section class="panel admin-table-panel" aria-labelledby="admin-hospitals-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Facility directory</p><h2 id="admin-hospitals-heading">Hospitals and blood banks</h2></div></div>
+      <p class="field-hint">Only mark facilities or inventory verified after an administrator has independently confirmed the information.</p>
+      <form id="admin-hospital-form" class="form-stack">
+        <input id="admin-hospital-id" type="hidden">
+        <div class="form-row">
+          <div class="field"><label for="admin-hospital-name">Facility name</label><input id="admin-hospital-name" name="name" required maxlength="120"></div>
+          <div class="field"><label for="admin-hospital-city">City</label><input id="admin-hospital-city" name="city" required maxlength="80"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label for="admin-hospital-address">Address</label><input id="admin-hospital-address" name="address" required maxlength="300"></div>
+          <div class="field"><label for="admin-hospital-contact">Contact number</label><input id="admin-hospital-contact" name="contactNumber" required maxlength="30"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label for="admin-hospital-website">Website (optional)</label><input id="admin-hospital-website" name="website" type="url" maxlength="300"></div>
+          <div class="field"><label for="admin-hospital-hours">Operating hours (optional)</label><input id="admin-hospital-hours" name="operatingHours" maxlength="300"></div>
+        </div>
+        <div class="field"><label for="admin-hospital-groups">Blood groups (comma-separated, optional)</label><input id="admin-hospital-groups" name="bloodGroups" placeholder="A+, O-" maxlength="50"><span class="field-hint">Updating inventory clears its verification until re-confirmed.</span></div>
+        <div class="form-row">
+          <div class="field"><label for="admin-hospital-latitude">Latitude (optional)</label><input id="admin-hospital-latitude" name="latitude" type="number" min="-90" max="90" step="any"></div>
+          <div class="field"><label for="admin-hospital-longitude">Longitude (optional)</label><input id="admin-hospital-longitude" name="longitude" type="number" min="-180" max="180" step="any"></div>
+        </div>
+        <div class="card-actions"><button id="admin-hospital-submit" class="button button-primary" type="submit">Add directory entry</button><button id="admin-hospital-cancel" class="button button-outline" type="button" hidden>Cancel edit</button></div>
+      </form>
+      <div id="admin-hospitals-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <form id="admin-hospital-filters" class="inline-filter"><label for="admin-hospital-status">Filter by verification</label><select id="admin-hospital-status" name="status"><option value="">All statuses</option><option>Pending</option><option>Verified</option><option>Rejected</option></select></form>
+      <div id="admin-hospitals-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Hospital admin pages"><button class="button button-outline button-small" id="admin-hospitals-prev" type="button" disabled>Previous</button><span id="admin-hospitals-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="admin-hospitals-next" type="button" disabled>Next</button></nav>
+    </section>
+    <section class="panel admin-table-panel" aria-labelledby="admin-requests-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Request moderation</p><h2 id="admin-requests-heading">Blood requests</h2></div></div>
+      <form id="admin-request-filters" class="inline-filter"><label for="admin-request-status">Filter by status</label><select id="admin-request-status" name="status"><option value="">All statuses</option><option>Open</option><option>Fulfilled</option><option>Closed</option></select></form>
+      <div id="admin-requests-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="admin-requests-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Admin request pages"><button class="button button-outline button-small" id="admin-requests-prev" type="button" disabled>Previous</button><span id="admin-requests-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="admin-requests-next" type="button" disabled>Next</button></nav>
+    </section>
+  </main>
+  <div data-site-footer></div>
+</body>
+</html>

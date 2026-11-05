@@ -1,0 +1,43 @@
+{
+  "name": "lifelink-blood-network",
+  "version": "1.0.0",
+  "description": "A life-saving blood network application.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "check:production-config": "node scripts/checkProductionConfig.js",
+    "test": "node --test test/admin-password-reset-logging.test.js test/admin-email-verification.test.js test/auth.test.js test/avatar-storage.test.js test/blood-compatibility.test.js test/common-session.test.js test/email-verification.test.js test/error-logging.test.js test/graceful-shutdown.test.js test/health-checks.test.js test/hospital-ui.test.js test/identity-document-access.test.js test/identity-document-r2.test.js test/identity-documents.test.js test/in-app-notifications.test.js test/local-file-storage.test.js test/mongo-connection.test.js test/offer-ui.test.js test/prescription-storage.test.js test/rate-limit-messages.test.js test/request-creation.test.js test/request-expiry-shutdown.test.js test/requester-offer-list.test.js test/required-transaction.test.js test/sentry-scrubber.test.js test/staging-config.test.js test/startup-config.test.js test/startup-failure-cleanup.test.js test/storage-cleanup.test.js test/storage-config.test.js test/storage-service.test.js test/upload-rate-limits.test.js test/user-profile.test.js test/production-config.test.js test/trusted-proxy.test.js test/server-security.test.js",
+    "health": "node scripts/healthcheck.js",
+    "create-admin": "node scripts/createAdmin.js"
+  },
+  "keywords": [
+    "blood",
+    "donor",
+    "lifelink",
+    "nodejs",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1161.0",
+    "@sentry/node": "^11.10.0",
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.11.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.7.1",
+    "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.24.7",
+    "multer": "^2.4.0",
+    "nodemailer": "^10.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

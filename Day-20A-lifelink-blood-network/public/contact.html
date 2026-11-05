@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbf8f6">
+  <meta name="description" content="Contact LifeLink support with a question or issue.">
+  <title>Contact support · LifeLink</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/common.js" defer></script>
+  <script src="js/contact.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div data-site-header></div>
+  <main id="main-content" class="container page-shell">
+    <section class="panel legal-content">
+      <p class="eyebrow">Help &amp; support</p>
+      <h1>Contact LifeLink support</h1>
+      <p>Tell us what you need help with. Please do not include passwords, verification codes, or sensitive medical information.</p>
+      <p>Prefer to call? <a href="tel:+923240128349">+92 324 0128349</a>. You can also <a href="https://wa.me/923240128349" rel="noopener noreferrer">open WhatsApp</a>.</p>
+      <p class="field-hint">To view ticket replies online, submit while signed in. If you are not signed in, provide an email address or phone number so support can respond.</p>
+      <form id="support-form" class="form-stack" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="support-name">Name <span>(optional)</span></label>
+            <input id="support-name" name="name" type="text" autocomplete="name" maxlength="100">
+          </div>
+          <div class="field">
+            <label for="support-category">Category</label>
+            <select id="support-category" name="category" required>
+              <option value="">Choose a category</option>
+              <option>Technical Issue</option>
+              <option>Report a User or Request</option>
+              <option>Donation Help</option>
+              <option>Account Problem</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="support-email">Email address <span>(optional)</span></label>
+            <input id="support-email" name="email" type="email" autocomplete="email" maxlength="254">
+          </div>
+          <div class="field">
+            <label for="support-phone">Phone number <span>(optional)</span></label>
+            <input id="support-phone" name="phone" type="tel" autocomplete="tel" maxlength="30">
+          </div>
+        </div>
+        <div class="field">
+          <label for="support-message">How can we help?</label>
+          <textarea id="support-message" name="message" rows="7" minlength="10" maxlength="5000" required></textarea>
+          <span class="field-hint">10 to 5000 characters. Never share passwords or verification codes.</span>
+        </div>
+        <div class="sr-only" aria-hidden="true">
+          <label for="support-website">Leave this field empty</label>
+          <input id="support-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <p id="support-message-status" class="form-message" role="status" aria-live="polite"></p>
+        <button class="button button-primary" type="submit">Send support request</button>
+      </form>
+    </section>
+
+    <section id="my-tickets-section" class="panel legal-content" aria-labelledby="my-tickets-heading" hidden>
+      <h2 id="my-tickets-heading">Your support requests</h2>
+      <p>Only you can see your support requests and replies.</p>
+      <div id="my-tickets" class="request-grid" aria-live="polite"></div>
+      <button id="load-more-tickets" class="button button-outline button-small" type="button" hidden>Load more</button>
+    </section>
+  </main>
+  <div data-site-footer></div>
+</body>
+</html>

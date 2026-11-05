@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#fbf8f6">
+  <title>Account safety · LifeLink</title><link rel="stylesheet" href="css/style.css">
+  <script src="js/common.js" defer></script><script src="js/account-security.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a><div data-site-header></div>
+  <main id="main-content" class="container page-shell">
+    <section class="page-intro"><p class="eyebrow">Account settings</p><h1>Account safety</h1><p>Manage your verification status and the accounts you have blocked.</p></section>
+    <div id="account-message" class="notice" role="status" aria-live="polite" hidden></div>
+    <section class="panel admin-table-panel" aria-labelledby="change-password-heading">
+      <p class="eyebrow">Sign-in security</p><h2 id="change-password-heading">Change password</h2>
+      <p class="muted-copy">Changing your password signs out all active sessions.</p>
+      <form id="change-password-form" class="form-stack">
+        <div class="field"><label for="current-password">Current password</label><input id="current-password" name="currentPassword" type="password" autocomplete="current-password" maxlength="72" required></div>
+        <div class="field"><label for="new-password">New password</label><input id="new-password" name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required><span class="field-hint">Use at least 8 characters.</span></div>
+        <div class="field"><label for="confirm-new-password">Confirm new password</label><input id="confirm-new-password" name="confirmNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required></div>
+        <p id="change-password-message" class="form-message" role="status" aria-live="polite"></p>
+        <button class="button button-primary" type="submit">Change password</button>
+      </form>
+    </section>
+    <div class="workspace-grid">
+      <section class="panel">
+        <p class="eyebrow">Email</p><h2 id="email-status">Loading…</h2>
+        <p id="email-address" class="muted-copy"></p>
+        <form id="resend-email-form" class="form-stack">
+          <p id="email-message" class="form-message" role="status" aria-live="polite"></p>
+          <button id="resend-email-button" class="button button-outline" type="submit">Resend verification email</button>
+        </form>
+      </section>
+      <section class="panel">
+        <p class="eyebrow">Phone</p><h2 id="phone-status">Loading…</h2>
+        <p id="phone-number" class="muted-copy"></p>
+        <form id="send-phone-code-form" class="form-stack">
+          <p id="phone-send-message" class="form-message" role="status" aria-live="polite"></p>
+          <button id="send-phone-code-button" class="button button-outline" type="submit">Send verification code</button>
+        </form>
+        <form id="verify-phone-form" class="form-stack">
+          <div class="field"><label for="phone-code">Six-digit code</label><input id="phone-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div>
+          <p id="phone-verify-message" class="form-message" role="status" aria-live="polite"></p>
+          <button class="button button-primary" type="submit">Verify phone</button>
+        </form>
+      </section>
+    </div>
+    <section class="panel admin-table-panel" aria-labelledby="identity-verification-heading">
+      <p class="eyebrow">Optional identity review</p><h2 id="identity-verification-heading">Identity verification</h2>
+      <p class="muted-copy">Upload a CNIC or other identity document for manual administrator review. The file is encrypted on the server and is not shown in public profiles. Do not upload if you do not consent.</p>
+      <p><strong>Status:</strong> <span id="identity-verification-status">Loading…</span></p>
+      <p id="identity-review-note" class="field-hint" hidden></p>
+      <form id="identity-document-form" class="form-stack">
+        <div class="field"><label for="identity-document-file">Identity document (PDF, JPG, PNG; max 5 MB)</label><input id="identity-document-file" name="identityDocument" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required></div>
+        <label class="check-row"><input id="identity-document-consent" name="consent" type="checkbox" required><span>I consent to secure storage and manual review of this document for identity verification.</span></label>
+        <p id="identity-document-message" class="form-message" role="status" aria-live="polite"></p>
+        <div class="card-actions">
+          <button id="identity-document-submit" class="button button-outline" type="submit">Submit for review</button>
+          <button id="withdraw-identity-document" class="button button-quiet" type="button" hidden>Withdraw and delete document</button>
+        </div>
+      </form>
+    </section>
+    <section id="review-activity" class="panel admin-table-panel" aria-labelledby="review-activity-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Completed donations</p><h2 id="review-activity-heading">Ratings and reviews</h2></div></div>
+      <p class="muted-copy">Rate the other participant after a completed donation. Reviews are visible publicly only after administrator moderation.</p>
+      <div id="reviews-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="review-offers" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Completed donation review pages"><button class="button button-outline button-small" id="review-offers-prev" type="button" disabled>Previous</button><span id="review-offers-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="review-offers-next" type="button" disabled>Next</button></nav>
+    </section>
+    <section class="panel admin-table-panel">
+      <div class="panel-heading"><div><p class="eyebrow">Your choices</p><h2>Blocked accounts</h2></div></div>
+      <p class="muted-copy">Blocked users are excluded from donor search, new offers, and accepted-offer contact sharing.</p>
+      <div id="blocks-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="blocked-users" class="stack-list" aria-busy="false"></div>
+    </section>
+  </main>
+  <div data-site-footer></div>
+</body>
+</html>

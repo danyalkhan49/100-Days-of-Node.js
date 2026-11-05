@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#fbf8f6">
+  <title>Donor workspace · LifeLink</title><link rel="stylesheet" href="css/style.css">
+  <script src="js/common.js" defer></script><script src="js/donor.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a><div data-site-header></div>
+  <main id="main-content" class="container page-shell">
+    <section class="page-intro page-intro-row"><div><p class="eyebrow">Donor workspace</p><h1>Your profile, your availability.</h1><p>Keep your details current and manage the offers you have made. You decide when you are available to help.</p></div><a class="button button-primary" href="requester.html#request-form-panel">Create Blood Request <span aria-hidden="true">→</span></a></section>
+    <div class="workspace-grid">
+      <section class="panel profile-panel" aria-labelledby="profile-heading">
+        <div class="panel-heading"><div><p class="eyebrow">Your information</p><h2 id="profile-heading">Donor profile</h2></div><span class="badge badge-neutral" id="profile-blood-group">Loading</span></div>
+        <div id="profile-message" class="notice" role="status" aria-live="polite" hidden></div>
+        <div class="profile-visual"><img id="donor-avatar" class="avatar avatar-large" alt="" hidden><span id="avatar-placeholder" class="avatar avatar-large avatar-placeholder" aria-hidden="true">L</span><div><strong id="profile-display-name">Your profile</strong><span id="profile-city">Loading your city…</span></div></div>
+        <form id="profile-form" class="form-stack" novalidate>
+          <div class="field"><label for="profile-name">Full name</label><input id="profile-name" name="name" required maxlength="80"></div>
+          <div class="form-row">
+            <div class="field"><label for="profile-phone">Phone number</label><input id="profile-phone" name="phone" type="tel" required maxlength="30"></div>
+            <div class="field"><label for="profile-city-input">City</label><input id="profile-city-input" name="city" required maxlength="80"></div>
+          </div>
+          <label class="toggle-row" for="profile-available"><span><strong>Available to donate</strong><small>Availability is checked before an offer can be made.</small></span><input id="profile-available" name="isAvailable" type="checkbox"><span class="toggle-control" aria-hidden="true"></span></label>
+          <p class="form-message" id="profile-form-message" role="status" aria-live="polite"></p>
+          <button class="button button-primary" type="submit">Save profile</button>
+        </form>
+        <div class="subsection">
+          <h3>Nearby donor search</h3><p class="muted-copy">If you choose, save a private location to help nearby searches. Your exact coordinates are never shown in donor listings.</p>
+          <button class="button button-outline button-small" id="save-search-location" type="button">Use my location</button>
+          <button class="button button-quiet button-small" id="remove-search-location" type="button">Remove saved location</button>
+          <p class="form-message" id="location-message" role="status" aria-live="polite"></p>
+        </div>
+        <div class="subsection">
+          <h3>Donation history</h3><p class="muted-copy">Completed donations recorded through LifeLink. Eligibility must still be confirmed by qualified healthcare professionals.</p>
+          <div id="donation-summary" class="stack-list" aria-busy="true"></div>
+        </div>
+        <div class="subsection">
+          <h3>Profile photo</h3><p class="muted-copy">Choose an image up to the server's configured size limit.</p>
+          <form id="avatar-form" class="upload-row"><div class="field"><label for="avatar-file">Choose a JPG, PNG, or WEBP image</label><input id="avatar-file" name="avatar" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required></div><button class="button button-outline" type="submit">Upload photo</button></form>
+          <p class="form-message" id="avatar-message" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+      <section class="panel offers-panel" aria-labelledby="offers-heading">
+        <div class="panel-heading"><div><p class="eyebrow">Your activity</p><h2 id="offers-heading">My offers</h2></div><a class="text-link" href="requests.html">Find requests <span aria-hidden="true">→</span></a></div>
+        <form id="offer-filter-form" class="inline-filter"><label for="offer-status-filter">Filter by status</label><select id="offer-status-filter" name="status"><option value="">All offers</option><option>Pending</option><option>Accepted</option><option>Declined</option><option>Completed</option><option>Canceled</option></select></form>
+        <div id="offers-message" class="notice" role="status" aria-live="polite" hidden></div>
+        <div id="donor-offers" class="stack-list" aria-busy="false"></div>
+        <nav class="pagination pagination-compact" aria-label="Your offer pages"><button class="button button-outline button-small" id="offers-prev" type="button" disabled>Previous</button><span id="offers-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="offers-next" type="button" disabled>Next</button></nav>
+      </section>
+    </div>
+  </main>
+  <dialog class="contact-dialog" id="contact-dialog" aria-labelledby="contact-title">
+    <div class="dialog-inner"><button class="dialog-close" type="button" data-close-dialog aria-label="Close contact details">×</button><p class="eyebrow">Accepted offer</p><h2 id="contact-title">Contact details</h2><p>These details are shared only with the people involved in this accepted offer.</p><div id="contact-details" class="contact-details"></div><button class="button button-outline" type="button" data-close-dialog>Close</button></div>
+  </dialog>
+  <div data-site-footer></div>
+</body>
+</html>

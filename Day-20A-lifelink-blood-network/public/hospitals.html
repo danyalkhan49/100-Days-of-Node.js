@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#fbf8f6">
+  <meta name="description" content="Find hospitals and blood banks listed in the LifeLink directory.">
+  <title>Hospital directory · LifeLink</title><link rel="stylesheet" href="css/style.css">
+  <script src="js/common.js" defer></script><script src="js/hospitals.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a><div data-site-header></div>
+  <main id="main-content" class="container page-shell">
+    <section class="page-intro"><p class="eyebrow">Local care directory</p><h1>Hospitals and blood banks</h1><p>Browse directory entries to help coordinate care. Always contact the facility directly to confirm services and current blood availability.</p></section>
+    <section class="panel" aria-labelledby="hospital-search-heading">
+      <div class="panel-heading"><div><p class="eyebrow">Directory search</p><h2 id="hospital-search-heading">Find a facility</h2></div></div>
+      <form id="hospital-filters" class="admin-filter-grid">
+        <div class="field"><label for="hospital-search">Facility name</label><input id="hospital-search" name="search" type="search" maxlength="100"></div>
+        <div class="field"><label for="hospital-city">City</label><input id="hospital-city" name="city" type="text" maxlength="100"></div>
+        <div class="field"><label for="hospital-blood-group">Verified blood group</label><select id="hospital-blood-group" name="bloodGroup"><option value="">Any blood group</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+        <div class="field"><label for="hospital-radius">Nearby radius</label><select id="hospital-radius"><option value="10">10 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select></div>
+        <div class="filter-submit"><button class="button button-primary" type="submit">Search</button><button id="hospital-nearby" class="button button-outline" type="button">Use my location</button></div>
+      </form>
+      <div id="hospital-directory-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="hospital-directory-list" class="stack-list" aria-busy="false"></div>
+      <nav class="pagination" aria-label="Hospital directory pages"><button class="button button-outline button-small" id="hospital-prev" type="button" disabled>Previous</button><span id="hospital-page" aria-live="polite">Page 1</span><button class="button button-outline button-small" id="hospital-next" type="button" disabled>Next</button></nav>
+    </section>
+  </main>
+  <div data-site-footer></div>
+</body>
+</html>

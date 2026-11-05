@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbf8f6">
+  <meta name="description" content="View public details for an open LifeLink blood request.">
+  <title>Blood request · LifeLink</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/common.js" defer></script>
+  <script src="js/request.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div data-site-header></div>
+  <main id="main-content" class="container page-shell">
+    <aside class="emergency-notice" role="note" aria-label="Emergency guidance">
+      <strong>Emergency?</strong> If someone's life is in immediate danger, contact your nearest hospital or call Pakistan Rescue 1122 immediately.
+      <a href="tel:1122" aria-label="Call Pakistan Rescue 1122">Call 1122</a>
+    </aside>
+    <section class="page-intro">
+      <p class="eyebrow">Public request details</p>
+      <h1 id="request-heading">Blood request</h1>
+      <p>Only publicly permitted request information is shown here. Requester and patient contact details remain private.</p>
+    </section>
+    <div id="request-message" class="notice" role="status" aria-live="polite" hidden></div>
+    <section id="request-detail" class="panel request-detail-card" aria-live="polite" aria-busy="true">
+      <div class="loading-state"><span class="spinner" aria-hidden="true"></span><span>Loading request…</span></div>
+    </section>
+  </main>
+  <div data-site-footer></div>
+</body>
+</html>
