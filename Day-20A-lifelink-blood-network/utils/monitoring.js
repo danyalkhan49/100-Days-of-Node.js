@@ -1,6 +1,35 @@
 const Sentry = require('@sentry/node');
 
+const SAFE_ERROR_CATEGORIES = new Set([
+  'AppError',
+  'Error',
+  'TypeError',
+  'RangeError',
+  'ReferenceError',
+  'SyntaxError',
+  'URIError',
+  'EvalError',
+  'MongoServerError',
+  'MongoNetworkError',
+  'MongoNetworkTimeoutError',
+  'JsonWebTokenError',
+  'TokenExpiredError',
+  'MulterError',
+  'ValidationError',
+  'CastError'
+]);
+
 let initialized = false;
+
+function safeErrorCategory(error) {
+  let name;
+  try {
+    name = error && error.name;
+  } catch {
+    return 'Error';
+  }
+  return SAFE_ERROR_CATEGORIES.has(name) ? name : 'Error';
+}
 
 function scrubEvent(event) {
   if (event.request) {
@@ -26,6 +55,7 @@ function scrubEvent(event) {
   if (event.message) event.message = '[redacted]';
   if (event.exception && Array.isArray(event.exception.values)) {
     for (const value of event.exception.values) {
+      value.type = safeErrorCategory({ name: value.type });
       value.value = '[redacted]';
       if (value.stacktrace && Array.isArray(value.stacktrace.frames)) {
         for (const frame of value.stacktrace.frames) {
@@ -42,6 +72,9 @@ function scrubEvent(event) {
     event.tags = Object.fromEntries(
       Object.entries(event.tags).filter(([key]) => allowedTags.includes(key))
     );
+    if (Object.hasOwn(event.tags, 'error.type')) {
+      event.tags['error.type'] = safeErrorCategory({ name: event.tags['error.type'] });
+    }
   }
   return event;
 }
@@ -62,7 +95,7 @@ function initializeMonitoring() {
 function captureException(error, req) {
   if (!initialized) return;
   Sentry.withScope((scope) => {
-    scope.setTag('error.type', error && error.name ? error.name : 'Error');
+    scope.setTag('error.type', safeErrorCategory(error));
     if (req) {
       scope.setTag('http.method', req.method);
       scope.setTag('http.route', req.route && req.route.path
@@ -85,4 +118,9 @@ function captureFrontendSignal({ eventType, page, requestId }) {
   return true;
 }
 
-module.exports = { initializeMonitoring, captureException, captureFrontendSignal, scrubEvent };
+module.exports = {
+  initializeMonitoring,
+  captureException,
+  captureFrontendSignal,
+  scrubEvent
+};

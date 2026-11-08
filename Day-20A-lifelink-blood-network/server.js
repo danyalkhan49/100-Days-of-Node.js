@@ -9,6 +9,7 @@ if (require.main === module) loadProjectEnvironment();
 
 const crypto = require('crypto');
 const { initializeMonitoring } = require('./utils/monitoring');
+const { logOperationFailure } = require('./utils/safeErrorLogger');
 const { getJwtSecret } = require('./utils/jwtSecret');
 const { configureTrustedProxy } = require('./utils/trustedProxy');
 const { assertProductionConfigForStartup } = require('./utils/productionConfig');
@@ -170,29 +171,40 @@ function registerRoutes() {
 }
 
 async function startServer() {
-  assertProductionConfigForStartup();
-  assertStagingConfigForStartup();
-  getJwtSecret();
-  initializeMonitoring();
-  const port = Number(process.env.PORT || 3000);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error('PORT must be an integer between 1 and 65535');
-  }
-  configureTrustedProxy(app);
-
-  if (!healthcheckPath.startsWith('/')) {
-    throw new Error('HEALTHCHECK_PATH must start with /');
-  }
-
+  let startupStage = 'production_config';
   const stopWorkers = [];
   let storageRuntime;
   let server;
   try {
+    assertProductionConfigForStartup();
+    startupStage = 'staging_config';
+    assertStagingConfigForStartup();
+    startupStage = 'jwt_initialization';
+    getJwtSecret();
+    startupStage = 'monitoring_initialization';
+    initializeMonitoring();
+    startupStage = 'port_validation';
+    const port = Number(process.env.PORT || 3000);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      throw new Error('PORT must be an integer between 1 and 65535');
+    }
+    startupStage = 'proxy_configuration';
+    configureTrustedProxy(app);
+
+    startupStage = 'healthcheck_validation';
+    if (!healthcheckPath.startsWith('/')) {
+      throw new Error('HEALTHCHECK_PATH must start with /');
+    }
+
+    startupStage = 'route_registration';
     registerRoutes();
+    startupStage = 'mongodb_connection';
     await connectDB();
     console.log('MongoDB connected successfully');
+    startupStage = 'storage_initialization';
     storageRuntime = initializeStorage();
     app.locals.storage = storageRuntime;
+    startupStage = 'background_workers';
     stopWorkers.push(startRequestExpiryCleanup());
     stopWorkers.push(startCriticalNotificationWorker());
     stopWorkers.push(startEligibilityReminderWorker());
@@ -205,6 +217,7 @@ async function startServer() {
       getStorage: () => storageRuntime
     }));
 
+    startupStage = 'http_server_binding';
     server = await new Promise((resolve, reject) => {
       const listeningServer = app.listen(port);
       server = listeningServer;
@@ -221,19 +234,27 @@ async function startServer() {
       listeningServer.once('listening', onListening);
     });
   } catch (error) {
-    await cleanupStartupFailure(error, {
-      server,
-      stopWorkers,
-      closeDatabase: () => mongoose.disconnect(),
-      closeStorage: () => storageRuntime && storageRuntime.close(),
-      timeoutMs: DEFAULT_SHUTDOWN_TIMEOUT_MS,
-      onShutdownStart: () => {
-        applicationLifecycle.started = false;
-        applicationLifecycle.shuttingDown = true;
-      }
-    });
+    try {
+      Object.defineProperty(error, 'startupStage', { value: startupStage, configurable: true });
+    } catch {
+      // Metadata is best effort; never replace the original startup failure.
+    }
+    if (server || stopWorkers.length || storageRuntime || mongoose.connection.readyState !== 0) {
+      await cleanupStartupFailure(error, {
+        server,
+        stopWorkers,
+        closeDatabase: () => mongoose.disconnect(),
+        closeStorage: () => storageRuntime && storageRuntime.close(),
+        timeoutMs: DEFAULT_SHUTDOWN_TIMEOUT_MS,
+        onShutdownStart: () => {
+          applicationLifecycle.started = false;
+          applicationLifecycle.shuttingDown = true;
+        }
+      });
+    }
+    throw error;
   }
-  server.on('error', (error) => console.error('HTTP server error:', error.message));
+  server.on('error', (error) => logOperationFailure('http_server_error', error));
   const shutdown = createGracefulShutdown({
     server,
     stopWorkers,
@@ -265,7 +286,7 @@ async function startServer() {
 
 if (require.main === module) {
   startServer().catch((error) => {
-    console.error('Server startup failed:', error.message);
+    logOperationFailure('server_startup_error', error);
     process.exitCode = 1;
   });
 }

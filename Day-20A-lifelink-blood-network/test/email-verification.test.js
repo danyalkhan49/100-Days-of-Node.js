@@ -317,6 +317,11 @@ test('email verification flow', async (t) => {
     mockedSendMail = async () => {
       const error = new Error('redacted SMTP auth failure');
       error.code = 'EAUTH';
+      error.name = 'synthetic-smtp-credential-name';
+      error.message = 'synthetic SMTP password and bearer token';
+      error.stack = 'synthetic SMTP stack containing private key';
+      error.cause = { token: 'synthetic-nested-secret' };
+      error.response = { recipient: 'synthetic-recipient@example.invalid' };
       throw error;
     };
 
@@ -340,8 +345,17 @@ test('email verification flow', async (t) => {
     assert.match(response.body.error, /could not authenticate/i);
     assert.equal(storedUser.emailVerificationToken, priorTokenHash);
     assert.equal(storedUser.emailVerificationExpires, priorExpiry);
-    assert.equal(JSON.stringify(errorLogs).includes('redacted SMTP auth failure'), false);
-    assert.equal(JSON.stringify(errorLogs).includes('smtp-failure@example.invalid'), false);
+    const logged = JSON.stringify(errorLogs);
+    assert.equal(logged.includes('operation_failure'), true);
+    assert.equal(logged.includes('email_verification_resend'), true);
+    assert.equal(logged.includes('EAUTH'), true);
+    for (const sensitive of [
+      'redacted SMTP auth failure', 'synthetic-smtp-credential-name',
+      'SMTP password', 'bearer token', 'private key', 'nested-secret',
+      'synthetic-recipient@example.invalid', 'smtp-failure@example.invalid'
+    ]) {
+      assert.equal(logged.includes(sensitive), false);
+    }
   });
 
   await t.test('valid token verifies the account once and then allows login', async () => {

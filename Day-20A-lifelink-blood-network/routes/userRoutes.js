@@ -13,6 +13,7 @@ const Block = require('../models/Block');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { normalizePakistanPhone, sendVerificationCode } = require('../utils/phoneProvider');
+const { logRollbackFailure } = require('../utils/safeErrorLogger');
 const {
   phoneOtpSendLimiter,
   phoneOtpVerifyLimiter,
@@ -264,7 +265,7 @@ router.post('/me/phone-otp', protect, phoneOtpSendLimiter, catchAsync(async (req
         }
       );
     } catch (cleanupError) {
-      console.error('Failed to clear an undelivered phone OTP.', cleanupError.code || cleanupError.name);
+      logRollbackFailure('phone_otp_delivery_cleanup', cleanupError);
     }
     throw error;
   }

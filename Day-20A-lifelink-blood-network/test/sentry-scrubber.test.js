@@ -1,6 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { scrubEvent } = require('../utils/monitoring');
+const monitoring = require('../utils/monitoring');
+const Sentry = require('@sentry/node');
+const { scrubEvent } = monitoring;
 
 test('scrubber removes all request headers while preserving safe request diagnostics', () => {
   const event = {
@@ -95,6 +97,46 @@ test('scrubber redacts event and exception messages and strips stack locals and 
   assert.equal(JSON.stringify(event).includes('synthetic-'), false);
 });
 
+test('scrubber removes malicious exception types and error tags while retaining safe diagnostics', () => {
+  const event = {
+    message: 'synthetic provider response with credential',
+    exception: {
+      values: [{
+        type: 'synthetic-api-key-and-token',
+        value: 'synthetic SMTP password and raw provider response',
+        stacktrace: {
+          frames: [{
+            filename: 'src/routes/profile.js',
+            function: 'updateProfile',
+            vars: { authorization: 'synthetic-bearer-token' }
+          }]
+        }
+      }]
+    },
+    tags: {
+      'error.type': 'synthetic-private-key',
+      'http.method': 'POST',
+      'http.route': '/api/profile',
+      'request.id': 'request_123',
+      'user.email': 'synthetic-user@example.invalid'
+    }
+  };
+
+  scrubEvent(event);
+
+  assert.equal(event.message, '[redacted]');
+  assert.equal(event.exception.values[0].type, 'Error');
+  assert.equal(event.exception.values[0].value, '[redacted]');
+  assert.deepEqual(event.tags, {
+    'error.type': 'Error',
+    'http.method': 'POST',
+    'http.route': '/api/profile',
+    'request.id': 'request_123'
+  });
+  assert.equal(Object.hasOwn(event.exception.values[0].stacktrace.frames[0], 'vars'), false);
+  assert.equal(JSON.stringify(event).includes('synthetic-'), false);
+});
+
 test('scrubber independently removes event extra data, contexts, user, and breadcrumbs', () => {
   const event = {
     extra: { nested: { apiKey: 'synthetic-extra-key' } },
@@ -135,4 +177,56 @@ test('scrubber retains only explicitly safe event tags and preserves their value
     'frontend.page': 'profile'
   });
   assert.equal(JSON.stringify(event).includes('synthetic-'), false);
+});
+
+test('captureException maps arbitrary error names to a safe category and retains known categories', () => {
+  const original = {
+    dsn: process.env.SENTRY_DSN,
+    init: Sentry.init,
+    withScope: Sentry.withScope,
+    captureException: Sentry.captureException
+  };
+  const tags = [];
+  const captured = [];
+  const error = new Error('synthetic message with provider credentials');
+  error.name = 'synthetic-private-key-and-token';
+  error.code = 'synthetic-provider-response';
+  error.stack = 'synthetic stack with SMTP password';
+  error.response = { authorization: 'synthetic-bearer-token' };
+
+  try {
+    process.env.SENTRY_DSN = 'https://synthetic.invalid/123';
+    Sentry.init = () => {};
+    Sentry.withScope = (callback) => callback({
+      setTag(key, value) { tags.push([key, value]); }
+    });
+    Sentry.captureException = (capturedError) => captured.push(capturedError);
+    monitoring.initializeMonitoring();
+    monitoring.captureException(error, {
+      method: 'POST',
+      path: '/api/profile',
+      id: 'request_123'
+    });
+    monitoring.captureException(new TypeError('synthetic ordinary diagnostic'));
+  } finally {
+    if (original.dsn === undefined) delete process.env.SENTRY_DSN;
+    else process.env.SENTRY_DSN = original.dsn;
+    Sentry.init = original.init;
+    Sentry.withScope = original.withScope;
+    Sentry.captureException = original.captureException;
+  }
+
+  assert.deepEqual(tags.filter(([key]) => key === 'error.type').map(([, value]) => value), [
+    'Error',
+    'TypeError'
+  ]);
+  assert.deepEqual(tags.slice(1, 4), [
+    ['http.method', 'POST'],
+    ['http.route', '/api/profile'],
+    ['request.id', 'request_123']
+  ]);
+  assert.equal(captured.length, 2);
+  assert.strictEqual(captured[0], error);
+  assert.equal(JSON.stringify(tags).includes('synthetic-'), false);
+  assert.equal(JSON.stringify(tags).includes('SMTP password'), false);
 });

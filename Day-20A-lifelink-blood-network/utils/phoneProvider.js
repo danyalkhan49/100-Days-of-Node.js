@@ -1,4 +1,5 @@
 const AppError = require('./AppError');
+const { logOperationFailure } = require('./safeErrorLogger');
 
 function normalizePakistanPhone(value) {
   if (typeof value !== 'string') throw new AppError('Phone number must be a string.', 400);
@@ -15,7 +16,7 @@ async function sendVerificationCode(phone, code) {
   return sendPhoneMessage(phone, `Your LifeLink verification code is ${code}. It expires in 5 minutes.`);
 }
 
-async function sendPhoneMessage(phone, message) {
+async function sendPhoneMessage(phone, message, { fetchImpl = global.fetch } = {}) {
   const provider = process.env.SMS_PROVIDER;
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -38,7 +39,7 @@ async function sendPhoneMessage(phone, message) {
   });
   let response;
   try {
-    response = await fetch(endpoint, {
+    response = await fetchImpl(endpoint, {
       method: 'POST',
       headers: {
         Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString('base64')}`,
@@ -47,12 +48,16 @@ async function sendPhoneMessage(phone, message) {
       body: form,
       signal: AbortSignal.timeout(15000)
     });
-  } catch (error) {
-    console.error('Phone verification provider request failed.', error.name || 'NetworkError');
+  } catch {
+    const safeError = new AppError('Phone provider request failed.', 503);
+    safeError.code = 'SMS_PROVIDER_FAILURE';
+    logOperationFailure('sms_provider_delivery', safeError);
     throw new AppError('The phone verification message could not be sent. Please try again later.', 503);
   }
   if (!response.ok) {
-    console.error('Phone verification provider rejected the request.', `HTTP ${response.status}`);
+    const safeError = new AppError('Phone provider rejected the request.', 503);
+    safeError.code = 'SMS_PROVIDER_REJECTED';
+    logOperationFailure('sms_provider_rejection', safeError);
     throw new AppError('The phone verification message could not be sent. Check the provider configuration and try again.', 503);
   }
 }

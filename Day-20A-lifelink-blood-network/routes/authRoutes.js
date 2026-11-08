@@ -16,11 +16,11 @@ const {
 } = require('../middleware/rateLimiters');
 const {
   createAccountMailTransporter,
-  getEmailFailureDetails,
   getEmailFailureMessage,
   sendPasswordResetEmail,
   sendVerificationEmail
 } = require('../utils/accountEmail');
+const { logOperationFailure, logRollbackFailure } = require('../utils/safeErrorLogger');
 const { normalizePakistanPhone } = require('../utils/phoneProvider');
 const protect = require('../middleware/protect');
 const {
@@ -102,7 +102,7 @@ router.post('/signup', signupLimiter, catchAsync(async (req, res) => {
   try {
     await sendVerificationEmail(user.email, rawVerificationToken);
   } catch (error) {
-    console.error('Registration verification email delivery failed.', getEmailFailureDetails(error));
+    logOperationFailure('email_registration_verification', error);
     throw new AppError(
       `Your account was created, but verification email delivery failed. ${getEmailFailureMessage(error)} Use resend verification after the email service is fixed.`,
       503
@@ -235,11 +235,9 @@ router.post('/resend-verification', ...verificationResendLimiters, catchAsync(as
             restore
           );
         } catch (restoreError) {
-          console.error('Failed to restore the prior verification token after email failure.', {
-            code: restoreError.code || restoreError.name || 'UNKNOWN_DATABASE_ERROR'
-          });
+          logRollbackFailure('email_verification_resend_cleanup', restoreError);
         }
-        console.error('Verification email delivery failed.', getEmailFailureDetails(error));
+        logOperationFailure('email_verification_resend', error);
         throw new AppError(getEmailFailureMessage(error), 503);
       }
     } else {
@@ -277,15 +275,9 @@ router.post('/forgot-password', forgotPasswordLimiter, catchAsync(async (req, re
           { $unset: { passwordResetToken: 1, passwordResetExpires: 1 } }
         );
       } catch (cleanupError) {
-        console.error(
-          'Failed to clear an undelivered password reset token.',
-          cleanupError.code || cleanupError.name || 'Unknown database error'
-        );
+        logRollbackFailure('email_password_reset_cleanup', cleanupError);
       }
-      console.error(
-        'Password reset email delivery failed.',
-        error.code || error.name || 'Unknown mail error'
-      );
+      logOperationFailure('email_password_reset', error);
     }
   }
 

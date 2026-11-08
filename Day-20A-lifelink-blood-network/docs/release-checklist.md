@@ -61,8 +61,23 @@
   DNS, and health/readiness routing in staging.
 - [ ] Configure and verify secret management, email/SMS delivery (if enabled),
   monitoring, database backups, retention, and a restore exercise.
+- [ ] Before the backup/recovery gate passes, verify the archive checksum, then
+  complete a controlled restore to an isolated synthetic database and record
+  post-restore checks for database identity, collections, indexes, approved
+  counts/integrity checks, transaction-capable topology, and application
+  readiness. A checksum alone does not prove restoreability.
+- [ ] Confirm retained database archives are stored in a dedicated,
+  access-controlled encrypted destination with a separately protected off-host
+  copy; verify Windows ACLs explicitly where applicable. Render Free's local
+  filesystem is ephemeral and is not a durable backup destination.
 - [ ] Complete staging smoke tests with synthetic accounts and files, then review
   rollback readiness before any production release.
+
+Application release rollback, MongoDB restore, and R2 object recovery are
+separate procedures. An application rollback does not revert database writes;
+database restoration requires an approved recovery point and isolated restore
+validation; R2 recovery requires its own verified object/versioning or backup
+procedure. Never treat one as a substitute for another.
 
 The offline coding regression is complete. These infrastructure and staging
 checks have not been performed, so this review does not establish production

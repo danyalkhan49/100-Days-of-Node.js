@@ -8,6 +8,7 @@ const User = require('../models/User');
 const { getCompatibleDonors, checkDonorEligibility } = require('./bloodCompatibility');
 const { sendNotificationEmail } = require('./accountEmail');
 const { normalizePakistanPhone, sendPhoneMessage } = require('./phoneProvider');
+const { logOperationFailure, safeErrorMetadata } = require('./safeErrorLogger');
 const { createInAppNotification, dispatchInAppNotification } = require('./inAppNotifications');
 
 const CRITICAL_BATCH_SIZE = 100;
@@ -67,6 +68,7 @@ async function claimNotification(additionalFilter = {}) {
 
 async function recordNotificationFailure(record, error, retryable = true) {
   const attempts = record.attempts || 1;
+  const safeFailure = safeErrorMetadata(error);
   const nextAttemptAt = retryable && attempts < MAX_NOTIFICATION_ATTEMPTS
     ? new Date(Date.now() + Math.min(60 * 60 * 1000, 30 * 1000 * (2 ** (attempts - 1))))
     : null;
@@ -75,9 +77,7 @@ async function recordNotificationFailure(record, error, retryable = true) {
       status: 'Failed',
       sendingAt: null,
       nextAttemptAt,
-      failureCode: typeof error.code === 'string'
-        ? error.code.slice(0, 80)
-        : error.name || 'DeliveryError'
+      failureCode: safeFailure.code || safeFailure.errorType
     }
   };
   if (!nextAttemptAt) update.$unset = { messageSubject: 1, messageText: 1 };
@@ -85,12 +85,7 @@ async function recordNotificationFailure(record, error, retryable = true) {
     { _id: record._id, status: 'Sending', sendingAt: record.sendingAt },
     update
   );
-  console.error('Notification delivery failed.', {
-    type: record.notificationType,
-    channel: record.channel,
-    recipientId: String(record.recipient),
-    code: error.code || error.name || 'DeliveryError'
-  });
+  logOperationFailure('notification_delivery', error);
 }
 
 async function deliverNotificationRecord(record) {
@@ -270,7 +265,7 @@ function startNotificationRetryWorker() {
       try {
         await processNotificationQueue();
       } catch (error) {
-        console.error('Notification retry queue failed.', error.code || error.name || 'NotificationError');
+        logOperationFailure('notification_retry_worker', error);
       } finally {
         running = false;
       }
@@ -449,6 +444,7 @@ async function processCriticalBatch() {
     );
     return true;
   } catch (error) {
+    const safeFailure = safeErrorMetadata(error);
     await NotificationDispatch.updateOne(
       { _id: dispatch._id, status: 'Processing', claimToken },
       {
@@ -457,7 +453,7 @@ async function processCriticalBatch() {
           nextBatchAt: new Date(Date.now() + CRITICAL_BATCH_DELAY_MS),
           claimToken: null,
           leaseExpiresAt: null,
-          lastFailureCode: typeof error.code === 'string' ? error.code.slice(0, 80) : error.name || 'DispatchError'
+          lastFailureCode: safeFailure.code || safeFailure.errorType
         }
       }
     );
@@ -475,7 +471,7 @@ function startCriticalNotificationWorker() {
       try {
         await processCriticalBatch();
       } catch (error) {
-        console.error('Critical notification batch failed.', error.code || error.name || 'DispatchError');
+        logOperationFailure('notification_critical_worker', error);
       } finally {
         running = false;
       }
@@ -594,7 +590,7 @@ function startEligibilityReminderWorker() {
       try {
         await processEligibilityReminderTask();
       } catch (error) {
-        console.error('Eligibility reminder task failed.', error.code || error.name || 'ReminderError');
+        logOperationFailure('notification_reminder_worker', error);
       } finally {
         running = false;
       }
@@ -688,9 +684,9 @@ function notifyRequestCanceled({ requestId, requesterId, offers }) {
   }
 }
 
-function dispatchNotification(work, label) {
+function dispatchNotification(work, _label) {
   Promise.resolve().then(work).catch((error) => {
-    console.error(`${label} notification processing failed.`, error.code || error.name || 'NotificationError');
+    logOperationFailure('notification_dispatch', error);
   });
 }
 

@@ -142,11 +142,7 @@ function getEmailFailureDetails(error) {
   else if (command.includes('RCPT TO') && [550, 551, 553, 554].includes(Number(error?.responseCode))) category = 'invalid_recipient';
   else if (Number(error?.responseCode) >= 400) category = 'provider_rejection';
 
-  return {
-    category,
-    ...(code && /^[A-Z0-9_]{1,40}$/.test(code) ? { code } : {}),
-    ...(Number.isInteger(error?.responseCode) ? { responseCode: error.responseCode } : {})
-  };
+  return { category };
 }
 
 function getEmailFailureMessage(error) {

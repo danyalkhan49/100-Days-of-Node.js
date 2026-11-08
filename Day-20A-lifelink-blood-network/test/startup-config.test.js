@@ -232,8 +232,10 @@ test('direct node server.js execution cannot bypass production validation', () =
       }
     );
     assert.equal(result.status, 1);
-    assert.match(`${result.stdout}${result.stderr}`, /Production configuration check failed/);
-    assert.match(`${result.stdout}${result.stderr}`, /FRONTEND_URL/);
+    assert.match(`${result.stdout}${result.stderr}`, /"event":"operation_failure"/);
+    assert.match(`${result.stdout}${result.stderr}`, /"operation":"server_startup_error"/);
+    assert.match(`${result.stdout}${result.stderr}`, /"startupStage":"production_config"/);
+    assert.doesNotMatch(`${result.stdout}${result.stderr}`, /Production configuration check failed/);
   } finally {
     rmSync(tempDirectory, { recursive: true, force: true });
   }
@@ -263,8 +265,9 @@ test('direct node server.js execution cannot bypass staging validation', () => {
       }
     );
     assert.equal(result.status, 1);
-    assert.match(`${result.stdout}${result.stderr}`, /Staging configuration check failed/);
-    assert.match(`${result.stdout}${result.stderr}`, /JWT_SECRET/);
+    assert.match(`${result.stdout}${result.stderr}`, /"event":"operation_failure"/);
+    assert.match(`${result.stdout}${result.stderr}`, /"operation":"server_startup_error"/);
+    assert.doesNotMatch(`${result.stdout}${result.stderr}`, /Staging configuration check failed|JWT_SECRET/);
   } finally {
     rmSync(tempDirectory, { recursive: true, force: true });
   }

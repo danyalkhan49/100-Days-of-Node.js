@@ -24,7 +24,9 @@ mongoose.connection.collection = () => ({
 const {
   loginLimiter,
   verificationEmailLimiter,
-  verificationResendLimiters
+  verificationResendLimiters,
+  phoneOtpSendLimiter,
+  phoneOtpVerifyLimiter
 } = require('../middleware/rateLimiters');
 
 function createServer(limiter) {
@@ -62,6 +64,16 @@ test('rate limit responses identify the limited action', async (t) => {
       limiter: verificationEmailLimiter,
       limit: 5,
       expectedMessage: 'Too many email verification attempts. Try again later.'
+    },
+    {
+      limiter: phoneOtpSendLimiter,
+      limit: 3,
+      expectedMessage: 'Too many phone verification messages. Try again later.'
+    },
+    {
+      limiter: phoneOtpVerifyLimiter,
+      limit: 10,
+      expectedMessage: 'Too many phone verification attempts. Try again later.'
     }
   ];
 

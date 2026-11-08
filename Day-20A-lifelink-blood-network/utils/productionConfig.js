@@ -47,7 +47,21 @@ function assertProductionConfigForStartup(env = process.env) {
   if (String(env.NODE_ENV || '').trim().toLowerCase() !== 'production') return;
   const errors = validateProductionConfig(env);
   if (errors.length) {
-    throw new Error(`Production configuration check failed: ${errors.join(' ')}`);
+    const issueChecks = [
+      ['NODE_ENV', 'NODE_ENV must be exactly production.'],
+      ['JWT_SECRET', 'JWT_SECRET is missing or invalid for production.'],
+      ['MONGO_URI', 'MONGO_URI is missing or invalid.'],
+      ['R2_CONFIGURATION', 'Cloudflare R2 production configuration is missing or invalid.'],
+      ['PORT', 'PORT must be an integer between 1 and 65535.'],
+      ['FRONTEND_URL', 'FRONTEND_URL must be a valid HTTPS URL without credentials, query, or fragment.'],
+      ['ID_DOCUMENT_ENCRYPTION_KEY', 'ID_DOCUMENT_ENCRYPTION_KEY must be 64 hexadecimal characters when configured.'],
+      ['TRUST_PROXY_HOPS', 'TRUST_PROXY_HOPS must be an integer from 1 to 10.']
+    ];
+    const error = new Error(`Production configuration check failed: ${errors.join(' ')}`);
+    error.productionConfigIssues = issueChecks
+      .filter(([, message]) => errors.includes(message))
+      .map(([check]) => check);
+    throw error;
   }
 }
 

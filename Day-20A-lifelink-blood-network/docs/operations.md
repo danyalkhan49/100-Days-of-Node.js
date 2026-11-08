@@ -12,6 +12,15 @@ same-origin `/api/system/client-error` endpoint; the browser does not submit
 exception messages, stacks, form contents, or account data. Sentry events remove
 request bodies, cookies, headers, query strings, user context, breadcrumbs, and
 exception text. Validate this scrubber with a test DSN before production use.
+When `SENTRY_DSN` is unset or empty, Sentry initialization is skipped and no
+Sentry events are sent. Application logs must not contain secrets, tokens,
+phone numbers, email addresses, OTPs, or personal information; safe error logs
+use fixed operation identifiers and allowlisted metadata only. Use `/live` for
+process liveness and `/ready` (or the configured readiness alias) for service
+readiness. Shutdown handles `SIGINT` and `SIGTERM` with a bounded 30-second
+grace period. Alert delivery and on-call ownership are not established by this
+repository; do not assume monitoring alerts are active until their delivery and
+escalation have been independently verified and an owner assigned.
 
 ## Production deployment
 
@@ -89,9 +98,11 @@ connected, and before shutdown begins; otherwise it returns HTTP 503. The
 configured `HEALTHCHECK_PATH` (default `/health`) is also a readiness alias.
 `npm run health` checks that configured path and requires the service to be
 reachable from the command's host. **External verification required:** check
-the public HTTPS route, proxy IP handling, login, email/SMS delivery as
-configured, private upload/download authorization, and R2 access in staging;
-do not use real identity documents for smoke tests.
+the public HTTPS route, proxy IP handling, login, private upload/download
+authorization, and R2 access in staging. Verify email/SMS behavior only through
+a separately reviewed safe sink; otherwise keep provider credentials unset and
+confirm no external message is delivered. Do not use real identity documents
+for smoke tests.
 
 For rollback, keep the last known-good application release and its dependency
 lockfile available. If a release fails, stop routing traffic to it, deploy the
@@ -122,26 +133,51 @@ node scripts\backupDatabase.js
 By default, compressed archives are written outside the application under
 `%USERPROFILE%\.lifelink\backups` (Windows) or `~/.lifelink/backups` (Linux/macOS).
 Set `DATABASE_BACKUP_DIR` to a private, access-controlled directory to use
-another location. Do not place backups in `public`, `uploads`, or a web-served
-directory, including using either protected directory itself as the target.
-The guard resolves existing symlinks before checking the destination. The
-script creates its temporary MongoDB config with a restrictive POSIX mode
-request; on Windows, explicitly restrict the backup directory ACL because
-mode bits do not establish Windows ACLs. Set
-`BACKUP_RETENTION_DAYS` (1–3650; default 14) and optionally
-`MONGODUMP_PATH` if the executable is not on `PATH`. The script uses a temporary
-restricted-permission config file, gzipped timestamped archives, an exclusive
-lock, and removes only expired archives matching its own filename format. If a
-process is forcibly terminated and `.backup.lock` remains, verify no backup is
-running before removing that lock file manually.
+another location. Use a dedicated directory for each database/environment and
+set `BACKUP_ENVIRONMENT` to a short environment label; if omitted, the script
+uses `NODE_ENV`, then `local`. Only expired archives whose names contain that
+exact environment label are eligible for retention cleanup. Archives made by
+older versions without an environment label are deliberately left untouched.
+Do not place backups in `public`, `uploads`, or a web-served directory,
+including using either protected directory itself as the target. The guard
+resolves existing symlinks before checking the destination. On POSIX systems,
+the script rejects a backup directory with group/other permission bits and
+sets completed archive and checksum files to owner-only mode before publishing
+them. On Windows, mode bits do not establish ACLs: an authorized operator must
+inspect and verify the directory and inherited file ACLs before use; the script
+does not prove Windows ACL safety. Set `BACKUP_RETENTION_DAYS` (1–3650; default
+14) and optionally `MONGODUMP_PATH` if the executable is not on `PATH`. The
+script uses a restricted temporary MongoDB config file, gzipped timestamped
+archives, a SHA-256 sidecar, and an exclusive lock. If a process is forcibly
+terminated and `.backup.lock`, `.part`, or `.mongodump-*.yaml` files remain,
+first verify the backup process is no longer running and inspect file ownership
+and timestamps. The script never automatically removes stale lock, partial
+archive, or temporary config files. Remove only confirmed stale artifacts
+manually through the approved operator procedure; cleanup of one failed
+temporary file does not prevent attempts to clean the others.
 
-The script's gzip compression is not encryption. **Infrastructure decision
-required:** encrypt the backup volume and off-host copy, restrict access to
-authorized backup/restore operators, and keep an independently protected
-offsite copy. The script retains archives only on its configured backup
-directory; it does not upload, encrypt, or verify offsite copies. Its
-`mongodump` invocation does not include `--oplog`, so do not treat an archive
-made while writes continue as a point-in-time-consistent replica-set backup.
+The script's gzip compression is not encryption, and the generated archive and
+checksum are not encrypted by the application. A checksum only detects
+unexpected byte changes when compared with a trusted sidecar; it does not
+authenticate the source, encrypt data, or prove that MongoDB can restore the
+archive. Treat an archive as complete only when its matching `.sha256` sidecar
+exists and verifies; an archive without a matching verified sidecar is
+unverified and must not be restored. Before retaining an archive, use a
+dedicated, access-controlled, encrypted backup destination and an independently
+protected encrypted off-host copy. The application does not configure or verify
+destination encryption, Windows ACLs, or offsite copies. To check a copied archive on Windows without
+printing the checksum values, compare its sidecar with `Get-FileHash`:
+
+```powershell
+$archive = '<protected-archive-path>'
+$expected = ((Get-Content -LiteralPath "$archive.sha256" -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+$actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $archive).Hash.ToLowerInvariant()
+if ($actual -ne $expected) { throw 'Backup checksum mismatch.' }
+```
+
+Its `mongodump` invocation does not include `--oplog`, so do not treat an
+archive made while writes continue as a point-in-time-consistent replica-set
+backup.
 Prefer managed snapshots/PITR for production consistency, or coordinate an
 approved write-quiescence/backup procedure and verify it meets the recovery
 objectives. Schedule one backup job on exactly one backup host, not on every
@@ -182,15 +218,20 @@ copied to a protected path:
 mongorestore --config="<protected-staging-restore-config.yaml>" --gzip --archive="<protected-archive-path>" --dryRun
 ```
 
-After confirming the target and dry-run output, perform the approved restore
-against that isolated staging database using the same command without
-`--dryRun`. Review `mongorestore --help` for the installed Database Tools
-version and its config-file format. Do not add `--drop` or broad namespace
-options unless the approved recovery plan explicitly requires them: they can
-replace existing collections/data. For production recovery, repeat only after
-the staging validation and explicit target/impact review; use the approved
-target-specific restore procedure and maintain the pre-restore snapshot for
-rollback. The application never restores a backup automatically.
+Before invoking `mongorestore`, verify the archive checksum against its
+sidecar using a trusted local tool; a matching checksum is not proof of
+decryptability, archive validity, or restore success. After confirming the
+target and dry-run output, perform the approved restore against that isolated
+staging database using the same command without `--dryRun`. Review
+`mongorestore --help` for the installed Database Tools version and its
+config-file format. Do not add `--drop` or broad namespace options unless the
+approved recovery plan explicitly requires them: they can replace existing
+collections/data. For production recovery, repeat only after the staging
+validation and explicit target/impact review; use the approved target-specific
+restore procedure and maintain the pre-restore snapshot for rollback. The
+application never restores a backup automatically. A controlled restore
+against an isolated synthetic target, followed by documented integrity and
+application checks, is required before the recovery gate can pass.
 
 After restore, verify expected database name, collections, indexes, document
 counts or other approved integrity checks, transaction-capable topology, and
@@ -290,15 +331,45 @@ each recovery decision before launch.
 
 ## External notification configuration
 
+### Synthetic staging delivery restrictions
+
+Keep external message delivery disabled during synthetic staging. Leave
+`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` unset. Leave
+`SMS_PROVIDER`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`,
+`TWILIO_FROM_NUMBER`, and `TWILIO_WHATSAPP_FROM` unset. Missing SMTP settings
+prevent mail transport creation; missing SMS/WhatsApp provider configuration
+fails closed before the provider request. The staging configuration does not
+require these delivery settings.
+
+Do not use real user email addresses or phone numbers, real OTPs, identity
+documents, or other personal data. Use synthetic accounts and data only. The
+automated email, SMS, WhatsApp, notification, and logging tests use mocks and do
+not deliver real messages. Do not run `node scripts/testGmailDelivery.js` for
+staging verification: it is an operational script that sends a real email when
+configured. The application does not provide a global staging delivery-disable
+switch, so never copy provider credentials into staging; if credentials are
+present, existing account and notification workflows can attempt live delivery.
+
+Render Free SMTP restrictions and the availability or terms of any provider's
+free tier have not been independently verified. Do not treat live delivery as
+supported or configure a paid provider, billing account, or payment card under
+the current project constraints. Email can remain unavailable in staging;
+verification and password-reset flows may report a delivery error without SMTP
+configuration. SMS/WhatsApp OTP requests return the existing service-unavailable
+response when provider configuration is absent.
+
 Email requires `FRONTEND_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and
 `SMTP_PASS` as documented in `.env.example`. For Gmail, set `SMTP_HOST` to
 `smtp.gmail.com` and `SMTP_PORT` to `465` (implicit TLS) or `587` (required
 STARTTLS). `SMTP_USER` is both the authorized Gmail login and sender address;
 `SMTP_PASS` must be its Google App Password, never the normal account password.
 The sender setting `SMTP_FROM` and transport toggle `SMTP_SECURE` are not used.
-Run `node scripts/testGmailDelivery.js` to send a plain-text test message to an
-address you control. The script confirms SMTP acceptance only; check the inbox
-and spam folder to confirm receipt. Phone messages require `SMS_PROVIDER=twilio` or
+These live-delivery instructions are for a separately approved environment,
+not synthetic staging. The script `node scripts/testGmailDelivery.js` sends a
+plain-text test message when configured; never run it during staging under the
+current restrictions. It confirms SMTP acceptance only; check the inbox and
+spam folder only when live delivery has been separately approved. Phone
+messages require `SMS_PROVIDER=twilio` or
 `SMS_PROVIDER=twilio-whatsapp`, the matching Twilio account credentials, and a
 configured sender. Only verified channels opted into by the user are eligible.
 Twilio API acceptance is recorded as `Sent`, not `Delivered`; no delivery

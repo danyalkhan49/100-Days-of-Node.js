@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Block = require('../models/Block');
 const InAppNotification = require('../models/InAppNotification');
+const Notification = require('../models/Notification');
 const errorHandler = require('../middleware/errorHandler');
 const { createInAppNotification } = require('../utils/inAppNotifications');
 const notifications = require('../utils/notifications');
@@ -29,6 +30,7 @@ const originalNotificationMethods = {
   deleteOne: InAppNotification.deleteOne,
   create: InAppNotification.create
 };
+const originalChannelNotificationCreate = Notification.create;
 
 let server;
 let baseUrl;
@@ -204,6 +206,7 @@ test('authenticated in-app notification inbox and triggers', async (t) => {
     for (const [name, method] of Object.entries(originalNotificationMethods)) {
       InAppNotification[name] = method;
     }
+    Notification.create = originalChannelNotificationCreate;
     if (originalJwtSecret === undefined) delete process.env.JWT_SECRET;
     else process.env.JWT_SECRET = originalJwtSecret;
   });
@@ -284,19 +287,44 @@ test('authenticated in-app notification inbox and triggers', async (t) => {
     assert.equal(createdRecords.length, 2);
   });
 
-  await t.test('new compatible requests create an inbox notice independent of email preferences', async () => {
+  await t.test('new compatible requests do not send to unverified or non-opted-in phone channels', async (subtest) => {
+    const originalSmsProvider = process.env.SMS_PROVIDER;
+    process.env.SMS_PROVIDER = 'twilio';
+    const attemptedChannelDeliveries = [];
+    Notification.create = async (documents) => {
+      attemptedChannelDeliveries.push(documents);
+      throw new Error('Unexpected external-channel delivery in mocked eligibility test.');
+    };
+    subtest.after(() => {
+      Notification.create = originalChannelNotificationCreate;
+      if (originalSmsProvider === undefined) delete process.env.SMS_PROVIDER;
+      else process.env.SMS_PROVIDER = originalSmsProvider;
+    });
     const donorId = new mongoose.Types.ObjectId();
+    const optedInButUnverifiedId = new mongoose.Types.ObjectId();
     User.find = () => ({
       select() {
         return {
-          lean: async () => [{
-            _id: donorId,
-            emailVerified: false,
-            phoneVerified: false,
-            notificationPreferences: { email: false, sms: false, whatsapp: false },
-            bloodGroup: 'O-',
-            lastDonationDate: null
-          }]
+          lean: async () => [
+            {
+              _id: donorId,
+              emailVerified: false,
+              phone: '+923001234567',
+              phoneVerified: true,
+              notificationPreferences: { email: false, sms: false, whatsapp: false },
+              bloodGroup: 'O-',
+              lastDonationDate: null
+            },
+            {
+              _id: optedInButUnverifiedId,
+              emailVerified: false,
+              phone: '+923001234568',
+              phoneVerified: false,
+              notificationPreferences: { email: false, sms: true, whatsapp: false },
+              bloodGroup: 'O-',
+              lastDonationDate: null
+            }
+          ]
         };
       }
     });
@@ -316,6 +344,7 @@ test('authenticated in-app notification inbox and triggers', async (t) => {
     assert.ok(notice);
     assert.equal(String(notice.recipient), String(donorId));
     assert.equal(String(notice.request), String(requestId));
+    assert.equal(attemptedChannelDeliveries.length, 0);
   });
 
   await t.test('completion and request closure create the corresponding event notices', async () => {
