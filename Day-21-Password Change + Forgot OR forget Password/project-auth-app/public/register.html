@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <title>Create account | Northstar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+  <main class="auth-layout">
+    <a class="brand" href="/register" aria-label="Northstar home">
+      <span class="brand-mark" aria-hidden="true">N</span>
+      <span>northstar</span>
+    </a>
+    <section class="auth-card" aria-labelledby="page-title">
+      <div class="eyebrow"><span class="eyebrow-dot"></span> Your next chapter starts here</div>
+      <h1 id="page-title">Create your account</h1>
+      <p class="subtitle">Join Northstar and bring your work into focus.</p>
+
+      <form id="register-form" novalidate>
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" autocomplete="name" placeholder="Alex Morgan" required>
+        </div>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input id="password" name="password" type="password" autocomplete="new-password" placeholder="At least 6 characters" minlength="6" required>
+            <button class="password-toggle" type="button" data-password-toggle="password" aria-label="Show password" aria-pressed="false">Show</button>
+          </div>
+          <p class="field-hint">Use at least 6 characters.</p>
+        </div>
+        <div class="field">
+          <label for="confirm-password">Confirm password</label>
+          <div class="password-wrap">
+            <input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Enter your password again" required>
+            <button class="password-toggle" type="button" data-password-toggle="confirm-password" aria-label="Show confirm password" aria-pressed="false">Show</button>
+          </div>
+        </div>
+        <div id="form-message" class="message" role="status" aria-live="polite"></div>
+        <button id="submit-button" class="button button-primary" type="submit">
+          <span class="button-label">Create account</span>
+          <span class="button-arrow" aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
+    </section>
+    <p class="auth-footer">A little more focus. A lot more momentum.</p>
+  </main>
+  <script src="js/register.js" defer></script>
+</body>
+</html>
